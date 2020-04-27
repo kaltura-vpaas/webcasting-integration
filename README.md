@@ -112,7 +112,8 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "dvrWindow": 6,
   "lastElapsedRecordingTime": 0,
   "liveStreamConfigurations": [
-    // configurations
+    
+    
   ],
   "currentBroadcastStartTime": 0,
   "recordingOptions": {

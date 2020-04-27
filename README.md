@@ -56,7 +56,7 @@ We'll also add a RecordingOptions object with these parameters:
 | shouldCopyEntitlement  | enum  | KalturaNullableBoolean.TRUE_VALUE | copy user entitlement settings from Live entry to Recorded VOD entry |
 | shouldMakeHidden  | enum  | KalturaNullableBoolean.TRUE_VALUE | hide the VOD entry in KMC, to only be accessible via the Live entry |
 
-Finally, the API call takes the webcastEntry we just created, and the `**sourceType**` of LIVE_STREAM, resulting something that looks like this: 
+Finally, the API call takes the webcastEntry we just created, and the `**sourceType**` of LIVE_STREAM, resulting in something that looks like this: 
 
 ### Example 
 
@@ -112,7 +112,7 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "dvrWindow": 6,
   "lastElapsedRecordingTime": 0,
   "liveStreamConfigurations": [
-    ...
+    // configurations
   ],
   "currentBroadcastStartTime": 0,
   "recordingOptions": {

@@ -24,7 +24,7 @@ We'll be creating an object with **`sourceType`** of `LIVE_STREAM[32]` with the 
 | mediaType  | enum  | KalturaMediaType.LIVE_STREAM_FLASH | indicates RTMP/RTSP source broadcast |
 | dvrStatus  | enum  | KalturaDVRStatus.ENABLED | enable or disable DVR |
 | dvrWindow  | int  | 60 | length of the DVR (minutes) |
-| recordingStatus  | enum  | KalturaRecordStatus.PER_SESSION | individual recording per event / append all events to one recording / disable recording |
+| recordStatus  | enum  | KalturaRecordStatus.PER_SESSION | individual recording per event / append all events to one recording / disable recording |
 | adminTags  | enum  | "kms-webcast-event" | required for analytics to track source |
 | pushPublishEnabled  | enum  | KalturaLivePublishStatus.DISABLED | required for analytics to track source |
 | explicitLive  | enum  | KalturaNullableBoolean.TRUE_VALUE | determines whether admins can preview the stream before going live* |
@@ -71,6 +71,7 @@ live_stream_entry.sourceType = KalturaSourceType.LIVE_STREAM
 live_stream_entry.adminTags = "kms-webcast-event"
 live_stream_entry.pushPublishEnabled = KalturaLivePublishStatus.DISABLED
 
+live_stream_entry.recording_status = KalturaRecordingStatus::ACTIVE
 live_stream_entry.explicitLive = KalturaNullableBoolean.TRUE_VALUE
 live_stream_entry.recordStatus = KalturaRecordStatus.PER_SESSION
 
@@ -113,7 +114,7 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "lastElapsedRecordingTime": 0,
   "liveStreamConfigurations": [
     
-    
+
   ],
   "currentBroadcastStartTime": 0,
   "recordingOptions": {
@@ -126,7 +127,7 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "segmentDuration": 6000,
   "explicitLive": true,
   "viewMode": 0,
-  "recordingStatus": 0,
+  "recordingStatus": 2,
   "lastBroadcastEndTime": 0,
   "mediaType": 201,
   "conversionQuality": 5195112,
@@ -171,6 +172,76 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "objectType": "KalturaLiveStreamEntry"
 }
 ```
+
+### Metadata 
+
+When the webcasting module is enabled on your account, two metadata profiles get created automatically. These are templates for schemas that contain information about the stream and the presenter. Once the schemas are populated, these profiles are updated on the liveStream entry that we just created. This data is needed by the webcast studio app in order to stream correctly and display presenter information. 
+
+#### Retrieving Metadata Profiles 
+
+The auto generated profiles are created with `system_name` KMS_KWEBCAST2 and KMS_EVENTS3. You'll need the profile ID's in order to interact with them, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the name and get the respective profiles. 
+
+```python
+filter = KalturaMetadataProfileFilter()
+filter.systemNameEqual = "KMS_KWEBCAST2"
+pager = KalturaFilterPager()
+
+result = client.metadata.metadataProfile.list(filter, pager)
+```
+
+You'll get a metadata profile that contains an XSD object, or XML schema, which defines the XML we'll want to create for the webcast. Learn more about [XML schemas](https://www.w3schools.com/xml/schema_intro.asp). Essentially you'll want to use tools in the language of your choice to create an XML object from the schema and add the relevant values. 
+
+For the purpose of this guide, however, we'll work with the XML directly, to give you a better understanding of what it looks like. 
+
+#### KMS_KWEBCAST2
+
+The first XML is the KMS_KWEBCAST2 schema that contains the **ID of the any presentation slides**, and answers two questions about the mechanics of the livestream: 
+
+1. **Is it a Kwebcast Entry? (boolean):**  is this an entry that is of type kwebcast
+2. **Is it self serve? (boolean):** is this livestream 
+
+These values are inserted to the XML like this: 
+
+```xml
+<?xml version=\"1.0\"?>\n<metadata><SlidesDocEntryId>123</SlidesDocEntryId><IsKwebcastEntry>1</IsKwebcastEntry><IsSelfServe>1</IsSelfServe></metadata>\n
+```
+
+and then updated using the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API like this: 
+
+```python
+metadata_profile_id = "<metadata profile ID retrieved above>"
+object_type = KalturaMetadataObjectType.ENTRY
+object_id = "<ID of livestream entry>"
+xml_data = "<XML string>"
+
+client.metadata.metadata.add(metadata_profile_id, object_type, object_id, xml_data)
+```
+
+#### KMS_EVENTS3
+
+Once again, you'll need the ID of the metadata profile, which we'll retrieve using its name in the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API:
+
+```python
+filter = KalturaMetadataProfileFilter()
+filter.systemNameEqual = "KMS_KWEBCAST2"
+pager = KalturaFilterPager()
+
+result = client.metadata.metadataProfile.list(filter, pager)
+```
+
+This XML contains event information, such as the start and end times (in unix timestamps), the time zone, and information about the speaker - name, title, bio, etc. 
+
+```xml
+<?xml version="1.0"?> <metadata><StartTime>1589137200</StartTime><EndTime>1589137440</EndTime><Timezone>Asia/Jerusalem</Timezone><Presenter><PresenterId>avital</PresenterId><PresenterName>Avital Tzubeli</PresenterName><PresenterTitle>Developer Advocate</PresenterTitle><PresenterBio>Awesome bio</PresenterBio><PresenterLink>https://www.linkedin.com/</PresenterLink><PresenterImage/></Presenter></metadata>
+```
+
+These details will all be displayed in the webcasting studio app. 
+//TODO 
+
+Once again, the XML is populated and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
+
+
+
 
 
 

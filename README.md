@@ -56,7 +56,7 @@ We'll also add a RecordingOptions object with these parameters:
 | shouldCopyEntitlement  | enum  | KalturaNullableBoolean.TRUE_VALUE | copy user entitlement settings from Live entry to Recorded VOD entry |
 | shouldMakeHidden  | enum  | KalturaNullableBoolean.TRUE_VALUE | hide the VOD entry in KMC, to only be accessible via the Live entry |
 
-Finally, the API call takes the webcastEntry we just created, and the `**sourceType**` of LIVE_STREAM, resulting in something that looks like this: 
+Finally, the API call takes the webcastEntry we just created, and the **`sourceType`** of `LIVE_STREAM[32]`, resulting in something that looks like this: 
 
 ### Example 
 
@@ -179,7 +179,7 @@ When the webcasting module is enabled on your account, two metadata profiles get
 
 #### Retrieving Metadata Profiles 
 
-The auto generated profiles are created with `system_name` KMS_KWEBCAST2 and KMS_EVENTS3. You'll need the profile ID's in order to interact with them, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the name and get the respective profiles. 
+The auto-generated profiles are created with `system_name` **KMS_KWEBCAST2** and **KMS_EVENTS3**. In order to use these profiles, you'll need the specific instances found in your account, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the name and get the respective profile IDs. 
 
 ```python
 filter = KalturaMetadataProfileFilter()
@@ -189,7 +189,7 @@ pager = KalturaFilterPager()
 result = client.metadata.metadataProfile.list(filter, pager)
 ```
 
-You'll get a metadata profile that contains an XSD object, or XML schema, which defines the XML we'll want to create for the webcast. Learn more about [XML schemas](https://www.w3schools.com/xml/schema_intro.asp). Essentially you'll want to use tools in the language of your choice to create an XML object from the schema and add the relevant values. 
+You'll get a metadata profile that contains an XSD object, or [XML schema](https://www.w3schools.com/xml/schema_intro.asp), which defines the XML we'll want to create for the webcast. Essentially you'll want to use tools in the language of your choice to create an XML object from the schema and add the relevant values. 
 
 For the purpose of this guide, however, we'll work with the XML directly, to give you a better understanding of what it looks like. 
 
@@ -217,6 +217,10 @@ xml_data = "<XML string>"
 client.metadata.metadata.add(metadata_profile_id, object_type, object_id, xml_data)
 ```
 
+That will return an object with a metadataRecordId, which you can use at any point for an update using [`metadata.update`](https://developer.kaltura.com/console/service/metadata/action/update): 
+
+$savedMetadata = $metadataPlugin->metadata->update($metadataRecordId, $metadataXmlString);
+
 #### KMS_EVENTS3
 
 Once again, you'll need the ID of the metadata profile, which we'll retrieve using its name in the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API:
@@ -238,7 +242,9 @@ This XML contains event information, such as the start and end times (in unix ti
 These details will all be displayed in the webcasting studio app. 
 //TODO 
 
-Once again, the XML is populated and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
+Like above, the XML is populated with the relevant values and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
+
+
 
 
 

@@ -34,8 +34,7 @@ We'll be creating an object with **`sourceType`** of `LIVE_STREAM[32]` with the 
 | Parameter  | Type  | Value  | Description |
 |---|---|---|---|
 | conversionProfileId  | int  | ID of desired conversion profile | cloud transcoding vs passthrough |
-| tags  | string  | tags | TODO: what are possible tags for the liveStream? |
-| recordedEntryId | string  | entryId | TODO |
+
 
 
 

@@ -242,19 +242,48 @@ This XML contains event information, such as the start and end times (in unix ti
 These details will all be displayed in the webcasting studio app. 
 //TODO 
 
-Like above, the XML is populated with the relevant values and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
+Like the first schema, the XML is populated with the relevant values and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
+
+
+
+## The Webcasting Studio App 
+
+The admins, or person presenting, will need to download and use the Kaltura Webcasting Desktop Application. 
+To launch the application, you'll need the attached KAppLauncher script, which requires the following params: 
+
+
+* **KS**: the Kaltura Session authentication string that should be used (see below)
+* **ks_expiry:** the time that the KS will expire in format `YYYY-MM-DDThh:mm:ss+00:00`
+* **MediaEntryId:** entry ID of the livestream
+* **checkForUpdates:** whether the application should check for update (default: true)
+* **uiConfId:** The uiConfId that holds data for webcasting application version, and where it needs an update. Differs for mac and windows 
+* **serverAddress:** API server address (ie https://www.kaltura.com) 
+* **eventsMetadataProfileId:(optional)**  ID of the metadata profile that contains presenter information
+* **appName (optional):** name of the application shown on splash screen (default: "Kaltura Webcast Studio")
+* **logoUrl (optional):** URL for company logo to be shown on top left of application (160 x 80 or similar ratio)
+* **fromDate (optional):** start time of the event (for the progress bar in the top right) in format `YYYY-MM-DDThh:mm:ss+00:00`
+* **toDate (optional):** anticipated end time of the event (for the progress bar in the top right), in format `YYYY-MM-DDThh:mm:ss+00:00`
+* **userId:** username that current user is associated with
+* **QnAEnabled:** whether `Q&A` module is enabled (default: true)
+* **pollsEnabled:** whether `Polls` module is enabled (default: true)
+* **playerUIConf:[optional]** used for debugging
+* **presentationConversionProfileId:** conversion profile ID used for converting presentations
+* **referer:[optional]**  URL of the referring site
+* **verifySSL:** if set to false, the application can get to https sites with unverified certificates. Used mainly for development (default: true)
+* **selfServeEnabled:** whether the self-serve module is enabled (default: false)
+* **participantsPanel:** whether to display the participants panel (default: true)
+* **appHostUrl:** base-URL of the webpage hosting the site. Used to open links to external entry data
+
+
+### Creating a Kaltura Session for a Studio Launch 
+
+
+
+### Launching the Webcasting Studio App 
 
 
 
 
-
-
-
-
-
-
-## Launching the Webcasting Studio App 
-for presenters and speakers 
 
 ## Multi-Presenters 
 

@@ -15,7 +15,7 @@ In the Kaltura API, a webcast stream is represented as a [LiveStream](https://de
 
 We'll be creating an object with **`sourceType`** of `LIVE_STREAM[32]` with the parameters described here: 
 
-### Required Parameters 
+### Parameters 
 
 | Parameter  | Type  | Value  | Description |
 |---|---|---|---|
@@ -23,26 +23,18 @@ We'll be creating an object with **`sourceType`** of `LIVE_STREAM[32]` with the 
 | description  | string  | description of livestream | description of livestream |
 | mediaType  | enum  | KalturaMediaType.LIVE_STREAM_FLASH | indicates RTMP/RTSP source broadcast |
 | dvrStatus  | enum  | KalturaDVRStatus.ENABLED | enable or disable DVR |
-| dvrWindow  | int  | 60 | length of the DVR (minutes) |
-| recordStatus  | enum  | KalturaRecordStatus.PER_SESSION | individual recording per event / append all events to one recording / disable recording |
-| adminTags  | enum  | "kms-webcast-event" | required for analytics to track source |
+| dvrWindow  | int  | 60 | length of the DVR in minutes (max 1440) |
+| recordStatus  | enum  | KalturaRecordStatus.APPENDED | individual recording per event / append all events to one recording / disable recording |
+| adminTags  | enum  | "vpaas-webcast" | required for analytics to track source |
 | pushPublishEnabled  | enum  | KalturaLivePublishStatus.DISABLED | required for analytics to track source |
 | explicitLive  | enum  | KalturaNullableBoolean.TRUE_VALUE | determines whether admins can preview the stream before going live* |
-
-### Optional Parameters 
-
-| Parameter  | Type  | Value  | Description |
-|---|---|---|---|
-| conversionProfileId  | int  | ID of desired conversion profile | cloud transcoding vs passthrough |
+| conversionProfileId  | int  | ID of desired conversion profile | cloud transcoding vs passthrough* |
 
 
 
+***explicitLive**: If set to true, only a KS with the `restrictexplicitliveview` privilege will be allowed to watch the stream before it is live (determined by the `isLive` flag). If set to false, the preview will not be available to any viewers, and `isLive` will be set automatically when the broadcast begins. 
 
-
-***explicitLive**: If set to true, only a KS with the `restrictexplicitliveview` privilege will be allowed to watch the stream before it is live, which is determined by the `isLive` flag. If set to false, `isLive` will be set automatically when the broadcast begins. 
-
-***conversionProfileId**: Leave this out for Cloud Transcode (default). For passthrough method, 
-call [`conversionProfile.list`](https://developer.kaltura.com/console/service/conversionProfile/action/list) API with a filter of `typeEqual = KalturaConversionProfileType.LIVE_STREAM[2]` to find the ID for Passthrough_Live profile. 
+***conversionProfileId**: Use [`conversionProfile.list`](https://developer.kaltura.com/console/service/conversionProfile/action/list) with filter of `typeEqual = KalturaConversionProfileType.LIVE_STREAM[2]` to find the profile IDs for cloud transcoding or passthrough
 
 -----
 
@@ -54,6 +46,7 @@ We'll also add a RecordingOptions object with these parameters:
 |---|---|---|---|
 | shouldCopyEntitlement  | enum  | KalturaNullableBoolean.TRUE_VALUE | copy user entitlement settings from Live entry to Recorded VOD entry |
 | shouldMakeHidden  | enum  | KalturaNullableBoolean.TRUE_VALUE | hide the VOD entry in KMC, to only be accessible via the Live entry |
+| shouldAutoArchive  | enum  | KalturaNullableBoolean.TRUE_VALUE | automatically archives the recording, in order  to separate it from other live instances |
 
 Finally, the API call takes the webcastEntry we just created, and the **`sourceType`** of `LIVE_STREAM[32]`, resulting in something that looks like this: 
 
@@ -77,6 +70,7 @@ live_stream_entry.recordStatus = KalturaRecordStatus.PER_SESSION
 live_stream_entry.recordingOptions = KalturaLiveEntryRecordingOptions()
 live_stream_entry.recordingOptions.shouldCopyEntitlement = KalturaNullableBoolean.TRUE_VALUE
 live_stream_entry.recordingOptions.shouldMakeHidden = KalturaNullableBoolean.TRUE_VALUE
+live_stream_entry.recordingOptions.shouldAutoArchive = KalturaNullableBoolean.TRUE_VALUE
 
 source_type = KalturaSourceType.LIVE_STREAM
 
@@ -84,7 +78,7 @@ result = client.liveStream.add(live_stream_entry, source_type)
 
 ```
 
-The result is a KalturaLiveStreamEntry object and looks something like this:
+The result is a KalturaLiveStreamEntry object that should look something like this:
 
 ### Result 
 
@@ -119,7 +113,7 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
   "recordingOptions": {
     "shouldCopyEntitlement": true,
     "shouldMakeHidden": true,
-    "shouldAutoArchive": false,
+    "shouldAutoArchive": true,
     "objectType": "KalturaLiveEntryRecordingOptions"
   },
   "liveStatus": 0,
@@ -172,7 +166,7 @@ The result is a KalturaLiveStreamEntry object and looks something like this:
 }
 ```
 
-### Metadata 
+## Metadata 
 
 When the webcasting module is enabled on your account, two metadata profiles get created automatically. These are templates for schemas that contain information about the stream and the presenter. Once the schemas are populated, these profiles are updated on the liveStream entry that we just created. This data is needed by the webcast studio app in order to stream correctly and display presenter information. 
 
@@ -238,8 +232,7 @@ This XML contains event information, such as the start and end times (in unix ti
 <?xml version="1.0"?> <metadata><StartTime>1589137200</StartTime><EndTime>1589137440</EndTime><Timezone>Asia/Jerusalem</Timezone><Presenter><PresenterId>avital</PresenterId><PresenterName>Avital Tzubeli</PresenterName><PresenterTitle>Developer Advocate</PresenterTitle><PresenterBio>Awesome bio</PresenterBio><PresenterLink>https://www.linkedin.com/</PresenterLink><PresenterImage/></Presenter></metadata>
 ```
 
-These details will all be displayed in the webcasting studio app. 
-//TODO 
+These details will be associated with the liveStream and will also be displayed in the Webcasting Studio app. 
 
 Like the first schema, the XML is populated with the relevant values and added to the livestream with the [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add) API as seen above. 
 
@@ -248,8 +241,9 @@ Like the first schema, the XML is populated with the relevant values and added t
 ## The Webcasting Studio App 
 
 The admins, or person presenting, will need to download and use the Kaltura Webcasting Desktop Application. 
-To launch the application, you'll need the attached KAppLauncher script, which requires the following params: 
+To launch the application, you'll need the attached [KAppLauncher script](TODO), which requires the following params: 
 
+### Launch Params 
 
 * **KS**: the Kaltura Session authentication string that should be used (see below)
 * **ks_expiry:** the time that the KS will expire in format `YYYY-MM-DDThh:mm:ss+00:00`
@@ -265,21 +259,127 @@ To launch the application, you'll need the attached KAppLauncher script, which r
 * **userId:** username that current user is associated with
 * **QnAEnabled:** whether `Q&A` module is enabled (default: true)
 * **pollsEnabled:** whether `Polls` module is enabled (default: true)
-* **playerUIConf:[optional]** used for debugging
-* **presentationConversionProfileId:** conversion profile ID used for converting presentations
-* **referer:[optional]**  URL of the referring site
+* **userRole:** refers to KMS roles. Should be set to `adminRole`
+* **playerUIConf:[optional]** used for debugging*
+* **presentationConversionProfileId:** conversion profile ID used for converting presentations (see below)
+* **referer:[optional]**  URL of the referring site or domain name
 * **verifySSL:** if set to false, the application can get to https sites with unverified certificates. Used mainly for development (default: true)
 * **selfServeEnabled:** whether the self-serve module is enabled (default: false)
 * **participantsPanel:** whether to display the participants panel (default: true)
 * **appHostUrl:** base-URL of the webpage hosting the site. Used to open links to external entry data
+* **myHostingAppName:** simple alpha-numeric string that represents the hosting application's name
 
 
 ### Creating a Kaltura Session for a Studio Launch 
 
+You'll create a type USER session using the [`session.start`](https://developer.kaltura.com/console/service/session/action/start) API, with privileges to the given entry and role of WEBCAST_PRODUCER_DEVICE_ROLE. 
 
+Partner ID and Admin Secret can be found in your KMC [Integration Settings](https://kmc.kaltura.com/index.php/kmcng/settings/integrationSettings). 
+
+Assuming a livestreamEntry ID of `1_yo43efjn`, Kaltura Session creation would look something like this:
+
+```python
+secret = "xxxxx"
+user_id = "your-email-address"
+k_type = KalturaSessionType.USER
+partner_id = 1234567
+expiry = 86400
+privileges = "setrole:WEBCAST_PRODUCER_DEVICE_ROLE,sview:*,list:1_yo43efjn,download:1_yo43efjn"
+
+result = client.session.start(secret, user_id, k_type, partner_id, expiry, privileges)
+```
+The above KS would give this user producer access to the entry within the Webcasting Studio. 
+
+#### Player UiConf 
+
+Most likely you were given the correct UiConf when Webcasting was enabled on your account, but if you're not sure which it is, you can use the [uiConf.list](https://developer.kaltura.com/console/service/uiConf/action/list) API to find it. 
+Just filter on `filter.nameLike = "MediaSpace Webcast Player"` and grab that ID. 
+
+#### Presentation Conversion Profile ID
+
+This is needed in the case that a presenter chooses to upload a presentation. *It will not work if you don't have a conversion profile ID.* 
+You can find it with the [conversionProfile.list](https://developer.kaltura.com/console/service/conversionProfile/action/list) API, by grabbing the first item in the results. 
+
+
+```python
+filter = KalturaConversionProfileFilter()
+pager = KalturaFilterPager()
+
+result = client.conversionProfile.list(filter, pager)
+
+first_item = vars(result)['objects'][0]
+conversion_profile_id = vars(first_item).get("id")
+```
+
+>`vars()` is a python function that uses an module's `dict` attribute to return an iterable we can work with. 
 
 ### Launching the Webcasting Studio App 
 
+So now that you've got all your parameters, you can add a link on your webpage that will instantly open the Webcasting Studio (see instructions for download links below). 
+
+You'll first need to load the script to the application launcher in the header of your HTML:
+
+```html
+<head>
+  <script type="text/javascript" src="KAppLauncher.js"></script>
+</head>
+```
+
+Create the button: 
+
+```html 
+<body>
+  <button id="launchProducerApp">Launch Kaltura Webcast App</button>
+</body>
+```
+
+And then the javascript code will activate the button and create a new Launcher object, then start the application with all of the parameters. 
+
+```javascript 
+document.getElementById("launchProducerApp").onclick = launchKalturaWebcast;
+
+function launchKalturaWebcast() {
+    var kapp = new KAppLauncher();
+
+    var params = {
+        'ks' => <KALTURA SESSION>,
+        'ks_expiry' => <EXPIRY DATE 'Y-m-d\TH:i:sP'>,
+        'MediaEntryId' => <LIVESTEAM ENTRY>,
+        'uiConfID' => <MAC OR WIN UI CONF>,
+        'serverAddress' => <SERVICE URL>,
+        'eventsMetadataProfileId' => <KMS_EVENTS3 ID>,
+        'kwebcastMetadataProfileId' => <KMS_KWEBCAST2 ID>,
+        'appName' => <APP NAME>,
+        'logoUrl' => <URL OF COMPANY LOGO>,
+        'fromDate' => <START TIME 'Y-m-d\TH:i:sP'>,
+        'toDate' => <END TIME 'Y-m-d\TH:i:sP'>,
+        'userId' => <USER ID>,
+        'QnAEnabled' => <TRUE / FALSE>,
+        'pollsEnabled' => <TRUE / FALSE>,
+        'userRole' => "adminRole", 
+        'playerUIConf' => <PLAYER ID>,
+        'presentationConversionProfileId' => <CONVERSION PROFILE ID>,
+        'referer' => <REFERRING SITE>,
+        'debuggingMode' => false, 
+        'verifySSL' => true,
+        'selfServeEnabled' => <TRUE / FALSE>,
+        'appHostUrl' => <APP HOST URL>,
+        'instanceProfile' => <HOSTING APP NAME>
+        };
+    
+    kapp.startApp(params, function(isSupported, failReason) {
+        if (!isSupported && failReason !== 'browserNotAware') {
+            alert(res + " " + reason);
+        } 
+    }, 3000, true);
+}
+```
+
+
+
+
+
+#### Creating Download Links 
 
 
 

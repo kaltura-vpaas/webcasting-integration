@@ -9,6 +9,8 @@ To get started, you'll need a Kaltura account, which you can sign up for [here](
 
 ### About Event Sizes 
 
+//todo 
+
 ## Creating a LiveStream Object 
 
 In the Kaltura API, a webcast stream is represented as a [LiveStream](https://developer.kaltura.com/api-docs/General_Objects/Objects/KalturaLiveStreamEntry) object. We will create one using the [liveStream.add](https://developer.kaltura.com/console/service/liveStream/action/add) action, but there is a little bit of configuration to do first. 
@@ -377,12 +379,25 @@ function launchKalturaWebcast() {
 
 
 
-
-
 #### Creating Download Links 
 
+To add download links to your webpage for the Kaltura Webcasting Studio, we'll make a call to the [systemUIConf.listTemplates](https://developer.kaltura.com/console/service/uiConf/action/listTemplates) API to list instances of Webcasting UI Configs and grab the first one. 
+Then we'll parse it to find the recommended versions for OSX and Windows. 
 
+```python 
+filter = KalturaUiConfFilter()
+filter.objTypeEqual = KalturaUiConfObjType.WEBCASTING
+pager = KalturaFilterPager()
 
+result = client.uiConf.listTemplates(filter, pager)
+first_item = vars(result)['objects'][0]
+config = json.loads(vars(first_item).get("config"))
+
+mac_download_url = config['osx']['recommendedVersionUrl']
+win_download_url = config['windows']['recommendedVersionUrl']
+```
+
+These URLS can be embedded to the page to automatically download the recommended version of the app. 
 
 ## Multi-Presenters 
 

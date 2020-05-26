@@ -108,9 +108,7 @@ The result of the above code sample is a KalturaLiveStreamEntry object that will
   "viewMode": 0,
   "recordingStatus": 2,
   "conversionProfileId": 5195112,
-  .
-  .
-  .
+  "...",
   "objectType": "KalturaLiveStreamEntry"
 }
 ```

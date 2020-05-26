@@ -309,11 +309,9 @@ pager = KalturaFilterPager()
 
 result = client.conversionProfile.list(filter, pager)
 
-first_item = vars(result)['objects'][0]
-conversion_profile_id = vars(first_item).get("id")
+first = result.objects[0]
+conversion_profile_id = first.id
 ```
-
->`vars()` is a python function that uses an module's `dict` attribute to return an iterable we can work with. 
 
 ### Launching the Webcasting Studio App 
 
@@ -390,8 +388,8 @@ filter.objTypeEqual = KalturaUiConfObjType.WEBCASTING
 pager = KalturaFilterPager()
 
 result = client.uiConf.listTemplates(filter, pager)
-first_item = vars(result)['objects'][0]
-config = json.loads(vars(first_item).get("config"))
+first = result.objects[0]
+config = json.loads(first.config)
 
 mac_download_url = config['osx']['recommendedVersionUrl']
 win_download_url = config['windows']['recommendedVersionUrl']

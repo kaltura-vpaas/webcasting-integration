@@ -1,8 +1,9 @@
 # webcasting-integration
 
-The Kaltura Webcasting suite provides a set of tools to broadcast live events on the web, including interactive video & slides sync, in-stream audience polls, moderated Q&A chat and live announcements. Kaltura Webcasting currently supports the following live source ingest protocols: RTMP, RTSP, SIP or WebRTC. To learn more about Kaltura Webcasting please visit: [webcasting.kaltura.com](https://webcasting.kaltura.com/).  
-In addition, the Kaltura suite of Webcasting tools can integrated, as a native component of any web application, and enhance your applications with video live streaming & webcasting capabilities.  
-This guide will walk you through the steps needed to set up the Webcast Launcher and embed the Kaltura live stream video player in your webpage. 
+The Kaltura Webcasting suite provides a set of tools to broadcast live events on the web, including interactive video and slides-sync, in-stream audience polls, moderated Q&A chat and live announcements. [Kaltura Webcasting]((https://webcasting.kaltura.com/)) currently supports the following live source ingest protocols: RTMP, RTSP, SIP or WebRTC. 
+
+The Kaltura suite of Webcasting tools can be integrated as a native component of any web application, and enhance your applications with video live-streaming and webcasting capabilities.  
+This guide will walk you through the steps needed to set up the Webcast Launcher and embed the Kaltura livestream video player in your webpage. 
 
 ## Before You Begin 
 
@@ -14,7 +15,7 @@ To get started, you'll need a Kaltura account, which you can sign up for [here](
 
 ## Creating a LiveStream Object 
 
-At the basis of Kaltura Webcast is a Live Stream (non interactive live broadcast). So, to create a webcast stream you will need to first create a [LiveStream](https://developer.kaltura.com/api-docs/General_Objects/Objects/KalturaLiveStreamEntry) object. We will create one using the [liveStream.add](https://developer.kaltura.com/console/service/liveStream/action/add) action. Then, to turn this live stream into an interactive webcast we will turn on little bit of configuration. 
+At the basis of a Kaltura Webcast is a Live Stream (non-interactive live broadcast). To create a webcast stream you'll first need to create a [LiveStream](https://developer.kaltura.com/api-docs/General_Objects/Objects/KalturaLiveStreamEntry) object, which we'll do using the [liveStream.add](https://developer.kaltura.com/console/service/liveStream/action/add) action. Then we'll add some configurations in order to turn this live stream into an interactive webcast. 
 
 We'll be creating an object with **`sourceType`** of `LIVE_STREAM [32]` with the parameters described here: 
 
@@ -118,7 +119,7 @@ The result of the above code sample is a KalturaLiveStreamEntry object that will
 
 When the webcasting module is enabled on your account, two metadata profiles get created automatically. These are templates for schemas that contain information about the stream and the presenter. Once the schemas are populated, these profiles are updated on the liveStream entry that we just created. This data is needed by the webcast studio app in order to connect to the platform and display the event information. This metadata is also used by applications such as Kaltura MediaSpace to present scheduling information.
 
-#### Retrieving Metadata Profiles 
+### Retrieving Metadata Profiles 
 
 The auto-generated profiles are created with `system_name` `KMS_KWEBCAST2` and `KMS_EVENTS3`. In order to use these profiles, you'll need the specific instances found in your account, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the name and get the respective profile IDs. 
 
@@ -138,11 +139,11 @@ You'll get a metadata profile that contains an XSD object, or [XML schema](https
 
 The XML defined by the KMS_KWEBCAST2 schema contains the following fields:
 
-*  `SlidesDocEntryId` - Representing Entry ID of the presentation slides Doc Entry (see: [documents](https://developer.kaltura.com/api-docs/service/documents))
-* `IsKwebcastEntry` - Boolean (0/1) indicating that this is a live stream entry of type Interactive Webcast
-* `IsSelfServe` - Boolean (0/1) indicating whether WebRTC based self-broadcast should be enabled inside the Webcasting Studio Application (if set to false, the webcasting app will only enable the use of external encoder).
+* `SlidesDocEntryId`: Representing Entry ID of the presentation slides entry (read more about [documents](https://developer.kaltura.com/api-docs/service/documents))
+* `IsKwebcastEntry` - Boolean (0/1) indicates whether this is a live stream entry of type Interactive Webcast
+* `IsSelfServe` - Boolean (0/1) indicates whether WebRTC-based self-broadcast should be enabled inside the Webcasting Studio Application (if set to false, the webcasting app will enable the use of an external encoder).
 
-Example KMS_KWEBCAST2 metadata XML:   
+#### KMS_KWEBCAST2 XML Example:   
 
 ```xml
 <?xml version="1.0"?>
@@ -153,7 +154,7 @@ Example KMS_KWEBCAST2 metadata XML:
 </metadata>
 ```
 
-Then the custom metadata is updated using [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add):
+The custom metadata is then updated using [`metadata.add`](https://developer.kaltura.com/console/service/metadata/action/add):
 
 ```python
 metadata_profile_id = "<metadata profile ID retrieved above>"
@@ -172,7 +173,7 @@ saved_metadata = client.metadata.metadata.update(metadata_record_id, xml_data)
 
 #### KMS_EVENTS3
 
-Similiarly, you'll need the ID of the metadata profile, which we'll retrieve using its name in the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API:
+Similarly, you'll need the ID of the metadata profile, which we'll retrieve using its name in the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API:
 
 ```python
 filter = KalturaMetadataProfileFilter()
@@ -338,8 +339,6 @@ function launchKalturaWebcast() {
     }, 3000, true);
 }
 ```
-
-
 
 #### Creating Download Links 
 

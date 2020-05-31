@@ -9,10 +9,6 @@ This guide will walk you through the steps needed to set up the Webcast Launcher
 
 To get started, you'll need a Kaltura account, which you can sign up for [here](https://vpaas.kaltura.com/reg/index.php). You'll also need the webcasting module enabled on your account. Speak to your account manager or email us at vpaas@kaltura.com to get your account configured. 
 
-### About Event Sizes 
-
-//todo 
-
 ## Creating a LiveStream Object 
 
 At the basis of a Kaltura Webcast is a Live Stream (non-interactive live broadcast). To create a webcast stream you'll first need to create a [LiveStream](https://developer.kaltura.com/api-docs/General_Objects/Objects/KalturaLiveStreamEntry) object, which we'll do using the [liveStream.add](https://developer.kaltura.com/console/service/liveStream/action/add) action. Then we'll add some configurations in order to turn this live stream into an interactive webcast. 
@@ -360,16 +356,3 @@ win_download_url = config['windows']['recommendedVersionUrl']
 
 These URLS can be embedded to the page to automatically download the recommended version of the app. 
 
-## Multi-Presenters 
-
-## Using your own encoder 
-
-## Using your own live stream 
-
-## Loading the Video Player 
-
-## Q&A 
-
-## Real Time Analytics 
-
-## Accessing The Event Recording 

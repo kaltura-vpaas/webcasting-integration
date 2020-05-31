@@ -109,8 +109,8 @@ The result of the above code sample is a KalturaLiveStreamEntry object that will
   "recordingStatus": 2,
   "conversionProfileId": 5195112,
   "...": "...",
-
-  
+  "...": "...",
+  "...": "...",
   "objectType": "KalturaLiveStreamEntry"
 }
 ```
@@ -208,7 +208,7 @@ Like the first schema, the XML is populated with the relevant values and added t
 ## The Webcasting Studio App 
 
 The admins, or person presenting, will need to download and use the Kaltura Webcasting Desktop Application. 
-To launch the application, you'll need the attached [KAppLauncher script](TODO), which requires the following params: 
+To launch the application, you'll need the attached [KAppLauncher script](https://github.com/kaltura-vpaas/webcasting-integration/blob/master/KAppLauncher.js), which requires the following params: 
 
 ### Launch Params 
 
@@ -282,7 +282,7 @@ conversion_profile_id = first.id
 
 So now that you've got all your parameters, you can add a link on your webpage that will instantly open the Webcasting Studio (see instructions for download links below). 
 
-You'll first need to load the script to the application launcher in the header of your HTML:
+You'll first need to load the script to the application [launcher](https://github.com/kaltura-vpaas/webcasting-integration/blob/master/KAppLauncher.js) in the header of your HTML:
 
 ```html
 <head>

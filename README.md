@@ -57,10 +57,10 @@ live_stream_entry.mediaType = KalturaMediaType.LIVE_STREAM_FLASH
 live_stream_entry.dvrStatus = KalturaDVRStatus.ENABLED
 live_stream_entry.dvrWindow = 60
 live_stream_entry.sourceType = KalturaSourceType.LIVE_STREAM
-live_stream_entry.adminTags = "kms-webcast-event"
+live_stream_entry.adminTags = "vpaas-webcast"
 live_stream_entry.pushPublishEnabled = KalturaLivePublishStatus.DISABLED
 
-live_stream_entry.recording_status = KalturaRecordingStatus::ACTIVE
+live_stream_entry.recording_status = KalturaRecordingStatus.ACTIVE
 live_stream_entry.explicitLive = KalturaNullableBoolean.TRUE_VALUE
 live_stream_entry.recordStatus = KalturaRecordStatus.PER_SESSION
 
@@ -173,7 +173,7 @@ Similarly, you'll need the ID of the metadata profile, which we'll retrieve usin
 
 ```python
 filter = KalturaMetadataProfileFilter()
-filter.systemNameEqual = "KMS_KWEBCAST2"
+filter.systemNameEqual = "KMS_EVENTS3"
 pager = KalturaFilterPager()
 
 result = client.metadata.metadataProfile.list(filter, pager)
@@ -243,7 +243,7 @@ Assuming a livestreamEntry ID of `1_yo43efjn`, Kaltura Session creation would lo
 
 ```python
 secret = "xxxxx"
-user_id = "your-email-address"
+user_id = "user-email-address"
 k_type = KalturaSessionType.USER
 partner_id = 1234567
 expiry = 86400

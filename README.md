@@ -26,7 +26,7 @@ We'll be creating an object with **`sourceType`** of `LIVE_STREAM [32]` with the
 | dvrWindow  | int  | 60 | length of the DVR in minutes (max 1440) |
 | recordStatus  | enum  | KalturaRecordStatus.APPENDED | individual recording per event / append all events to one recording / disable recording |
 | adminTags  | enum  | "vpaas-webcast" | required for analytics to track source |
-| pushPublishEnabled  | enum  | KalturaLivePublishStatus.DISABLED | required for analytics to track source |
+| pushPublishEnabled  | enum  | KalturaLivePublishStatus.DISABLED | should only be enabled if multicasting is set up |
 | explicitLive  | enum  | KalturaNullableBoolean.TRUE_VALUE | determines whether admins can preview the stream before going live* |
 | conversionProfileId  | int  | ID of desired conversion profile | cloud transcoding vs passthrough* |
 

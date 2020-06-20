@@ -233,7 +233,7 @@ To launch the application, you'll need the attached [KAppLauncher script](https:
 * **myHostingAppName:** simple alpha-numeric string that represents the hosting application's name
 
 
-### Creating a Kaltura Session for a Studio Launch 
+#### Creating a Kaltura Session for a Studio Launch 
 
 You'll create a type USER session using the [`session.start`](https://developer.kaltura.com/console/service/session/action/start) API, with privileges to the given entry and role of WEBCAST_PRODUCER_DEVICE_ROLE. 
 
@@ -294,7 +294,9 @@ Create the button:
 </body>
 ```
 
-And then the javascript code will activate the button and create a new Launcher object, then start the application with all of the parameters. 
+Depending on your application, you can either create the params dictionary for the launcher object with javascript code, or pass it from the backend of your application, which is how it's done in the [python sample](https://github.com/kaltura-vpaas/webcasting-app-python). 
+
+We'll show it here in javascript. The params object is created using the data we've collected above, and then the click of the `launchProducerApp` button will create a new Launcher object and start the application with all of the parameters. 
 
 ```javascript 
 document.getElementById("launchProducerApp").onclick = launchKalturaWebcast;
@@ -356,3 +358,197 @@ win_download_url = config['windows']['recommendedVersionUrl']
 
 These URLS can be embedded to the page to automatically download the recommended version of the app. 
 
+## Viewing the Livestream
+
+When the broadcast is live, it takes about thirty seconds for it to be available for the viewer. During this time, the preview is available to a user with a Kaltura Session that contains "explictivlive" in the privilege string. 
+
+Do determine whether an entry is live, you can call the [isLive](https://developer.kaltura.com/console/service/liveStream/action/isLive) with the entry ID. 
+The Kaltura Player does this automatically for live entries, but we'll want to determine whether to play the live entry, or whether to replace it with the recorded entry if the Live Event is already complete. 
+
+```python
+is_live = client.liveStream.isLive(entry_id, KalturaPlaybackProtocol.AUTO)
+if (is_live == False):
+    if ((livestream.redirectEntryId) and livestream.redirectEntryId != ''):
+        entry_id = livestream.redirectEntryId
+    elif ((livestream.recordedEntryId) and livestream.recordedEntryId != ''):
+        entry_id = livestream.recordedEntryId
+```
+
+For the case of `PER_SESSION` recording, the `recordedEntryId` field on the livestream Entry will be reset immediately, so we can find the entry by doing a [`baseEntry.list`](https://developer.kaltura.com/console/service/baseEntry/action/list) with the **rootEntryId** equal to our livestream entry:
+
+```python
+    else:
+        filter = KalturaBaseEntryFilter()
+        filter.rootEntryIdEqual = entry_id
+        pager = KalturaFilterPager()
+
+        result = client.baseEntry.list(filter, pager)
+        if (result.objects):
+            entry_id = result.objects[0].id
+```
+
+Now that we have an entry ID for playback, we can create a Kaltura Session for the player embed. 
+The most important part of the player KS is the privileges string, comma-separated key-value  string that contains information about the user and the app, to be used for analytics and playback permission. It needs the entry ID, the user ID, and application ID and domain. 
+The string looks something like this - using the format tool to concatenate values:
+
+```python
+privileges = "sview:{},restrictexplicitliveview:{},enableentitlement,appid:{},appdomain:{},sessionkey:{}" \
+  .format(entry_id, entry_id, config.app_id, config.app_domain, user_id)
+```
+With that privilege string, we create a USER Kaltura Session using the [`session.start`](https://developer.kaltura.com/console/service/session/action/start) API as seen above.
+
+> Now that we have a Kaltura Session, we can embed the player in an HTML page. We recommend using the v7 player, which is built for speed and performance. However, the functionality for powerpoint slides in the livestream is not yet supported in player v7, so if this is something that is required in your webcasting flow, see Player V2 embed below. 
+
+### Player Embed V7 
+
+You can create a new player in the [Studio](https://kmc.kaltura.com/index.php/kmcng/studio/v3) and grab its ID, which is referred to as the UI Conf ID. You'll need to edit it using the [uiconf.update](https://developer.kaltura.com/console/service/uiConf/action/update) API:
+
+// TODO 
+
+
+
+In the HTML code, the first thing you'll need is the script that loads the Kaltura Player, which looks like this: 
+
+```javascript
+  <script type="text/javascript" src="https://cdnapisec.kaltura.com/p/{{ partner_id }}/embedPlaykitJs/uiconf_id/{{ uiconf_id }}"></script>
+```
+
+The TARGET_ID is the ID of the div that will contain the player:
+
+```html
+<div id="kaltura_player"></div>
+```
+
+And finally, the player embed script, for which you'll need your Partner ID, the KS we created above, the ID of the viewer, and the ID of the player:
+
+```javascript
+<script>
+        var kalturaPlayer = KalturaPlayer.setup({
+        targetId: "kaltura_player",
+        provider: {
+            partnerId: '{{ partner_id }}',
+            uiConfId: '{{ uiconf_id }}', 
+            ks: '{{ ks }}'
+        },
+        playback: {
+            preload: "auto",
+            autoplay: true
+        },
+        session: {
+            userId: '{{ user_id }} '
+        }, 
+        ui: {
+            debug: true
+        },
+        plugins: {
+            qna: {
+                dateFormat: "mmmm do, yyyy",
+                expandMode: "OverTheVideo",
+                expandOnFirstPlay: true,
+                userRole: 'unmoderatedAdminRole' 
+                }
+            } 
+        });
+        kalturaPlayer.loadMedia({entryId: '{{ entry_id }}'});
+
+    </script>
+```
+
+### Player V2 Embed 
+
+In the HTML code, the first thing you'll need is the script that loads the Kaltura Player, which looks like this: 
+
+```javascript
+<script type="text/javascript" src='https://cdnapisec.kaltura.com/p/{PARTNER_ID}/embedPlaykitJs/uiconf_id/{UICONF_ID}?autoembed=true&targetId={TARGET_ID}&entry_id={ENTRY_ID}&config[playback]={"autoplay":true}'></script>
+```
+
+The TARGET_ID is the ID of the div that will contain the player:
+
+```html
+<div id="kaltura_player"></div>
+```
+
+And finally, the player embed script, for which you'll need your Partner ID, the KS we created above, the ID of the viewer, the application name, and the ID of the player:
+
+```javascript
+<script>
+    kWidget.embed({
+        'targetId': 'kaltura_player',
+        'wid': '_{{ partner_id }}',
+        'uiconf_id': '{{ uiconf_id }}',
+        'flashvars':
+            {
+            'ks': '{{ ks }}',
+    'applicationName': '{{ app_name }}',
+    'disableAlerts': 'false',
+    'externalInterfaceDisabled': 'false',
+    'autoPlay': 'true',
+            'autoMute': 'false',
+            'largePlayBtn.plugin': 'false',
+            'expandToggleBtn.plugin':'false',
+    'dualScreen': {'plugin': 'true'},
+    'chapters': {'plugin': 'true'},
+    'sideBarContainer': {'plugin': 'true'},
+    'LeadWithHLSOnFlash': 'true',
+    'EmbedPlayer.LiveCuepoints': 'true',
+    'EmbedPlayer.EnableIpadNativeFullscreen': 'true',
+    'qna': {
+      'plugin': 'true',
+      'moduleWidth': '200',
+      'containerPosition': 'right',
+      'qnaPollingInterval': '10000',
+      'onPage': 'false',
+      'userId': '{{ user_id }}',
+      'userRole': 'viewerRole',
+      'qnaTargetId': 'qnaListHolder'
+    },
+    'webcastPolls': {'plugin': 'true', 'userId': '{{ user_id }}', 'userRole': 'viewerRole'}
+  },
+'entry_id': '{{ entry_id }}'
+});
+</script>
+```
+
+## Moderator View 
+
+The moderator view is the in-browser interface that allows a moderator to handle Q&A and announcements for the livestream. 
+It requires the base URL and a series of query parameters, which include a Kaltura Session of privileges that are similar to the Launcher KS. 
+
+### Base URL 
+
+```
+https://www.kaltura.com/apps/webcast/vlatest/index.html?
+```
+
+### Parameters 
+
+- **MediaEntryId:** entry ID of the livestream 
+- **ks:** Kaltura Session of type USER with privileges described below  
+- **ks_expiry:** expiration date of the KS, in format `Y-m-d\TH:i:sP`
+- **qnaModeratorMode:** (boolean) whether Q&A is enabled 
+- **serverAddress:** service URL 
+- **fromDate:** the start date of the livestream, in format `Y-m-d\TH:i:sP`
+- **toDate:** the end date of the livestream, in format `Y-m-d\TH:i:sP`
+
+### Kaltura Session 
+
+The KS should have similar permissions as that passed to the App Launcher: 
+
+```python
+secret = "xxxxx"
+user_id = "user-email-address"
+k_type = KalturaSessionType.USER
+partner_id = 1234567
+expiry = 86400
+privileges = "setrole:WEBCAST_PRODUCER_DEVICE_ROLE,sview:*,list:<ENTRY>,download:<ENTRY>"
+
+result = client.session.start(secret, user_id, k_type, partner_id, expiry, privileges)
+```
+
+### Complete URL 
+
+The final URL, after adding the params and URL-encoding, should look something like this:
+
+```
+https://www.kaltura.com/apps/webcast/vlatest/index.html?MediaEntryId=1_1sd21wtr&ks=djJ8MjM2NTQ5MXy7pYnF-OQYtGGuu0vWTDho3bNm25jOIhf_hrNJIPpdQMUPdWWt8QsCgXdnsjZ-p6l-BWsxQgtlJfblaNTIfNsTU6riE3fkKt3ubQkIxndMRinS3G8_AtW3nnUcpfTfRaSfEwXhBIVC_UfhoDyApTfr5IoOgj32CcS5uhKoXCLnHL2aB9saEKEC0XppwCkVBPPt1VTijhRCt1hC0mAq23z9&ks_expiry=2020-06-21+23%3A10%3A43.378412&qnaModeratorMode=True&serverAddress=https%3A%2F%2Fwww.kaltura.com%2F&fromDate=2020-06-20+23%3A12%3A43.378830&toDate=2020-06-20+23%3A18%3A43.378845
+```

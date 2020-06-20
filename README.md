@@ -552,3 +552,16 @@ The final URL, after adding the params and URL-encoding, should look something l
 ```
 https://www.kaltura.com/apps/webcast/vlatest/index.html?MediaEntryId=1_1sd21wtr&ks=djJ8MjM2NTQ5MXy7pYnF-OQYtGGuu0vWTDho3bNm25jOIhf_hrNJIPpdQMUPdWWt8QsCgXdnsjZ-p6l-BWsxQgtlJfblaNTIfNsTU6riE3fkKt3ubQkIxndMRinS3G8_AtW3nnUcpfTfRaSfEwXhBIVC_UfhoDyApTfr5IoOgj32CcS5uhKoXCLnHL2aB9saEKEC0XppwCkVBPPt1VTijhRCt1hC0mAq23z9&ks_expiry=2020-06-21+23%3A10%3A43.378412&qnaModeratorMode=True&serverAddress=https%3A%2F%2Fwww.kaltura.com%2F&fromDate=2020-06-20+23%3A12%3A43.378830&toDate=2020-06-20+23%3A18%3A43.378845
 ```
+
+## Accessing Recordings 
+
+Assuming that recording is enabled (`recordStatus` in the livestream creation), your recordings can be found in the [KMC](https://kmc.kaltura.com/index.php/kmcng/content/entries/lis). You can also retrieve with the API by using the livestream Entry ID as the root entry, which will return all recordings that resulted from this entry. You'll use the [baseEntry.list](https://developer.kaltura.com/console/service/baseEntry/action/list) API, and note that it requires an ADMIN type Kaltura Session:
+
+```python
+filter = KalturaBaseEntryFilter()
+filter.rootEntryIdEqual = <ENTRY ID>
+
+result = client.baseEntry.list(filter)
+```
+
+

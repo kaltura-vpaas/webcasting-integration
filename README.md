@@ -60,7 +60,6 @@ live_stream_entry.sourceType = KalturaSourceType.LIVE_STREAM
 live_stream_entry.adminTags = "vpaas-webcast"
 live_stream_entry.pushPublishEnabled = KalturaLivePublishStatus.DISABLED
 
-live_stream_entry.recording_status = KalturaRecordingStatus.ACTIVE
 live_stream_entry.explicitLive = KalturaNullableBoolean.TRUE_VALUE
 live_stream_entry.recordStatus = KalturaRecordStatus.PER_SESSION
 

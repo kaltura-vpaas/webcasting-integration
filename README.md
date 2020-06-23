@@ -116,7 +116,7 @@ When the webcasting module is enabled on your account, two metadata profiles get
 
 ### Retrieving Metadata Profiles 
 
-The auto-generated profiles are created with `system_name` `KMS_KWEBCAST2` and `KMS_EVENTS3`. In order to use these profiles, you'll need the specific instances found in your account, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the name and get the respective profile IDs. 
+The auto-generated profiles are created with the names `KMS_KWEBCAST2` and `KMS_EVENTS3`. In order to use these profiles, you'll need the specific instances found in your account, so we'll use the [metadataProfile.list](https://developer.kaltura.com/console/service/metadataProfile/action/list) API to filter on the **systemName** and get the respective profile IDs. 
 
 ```python
 filter = KalturaMetadataProfileFilter()
@@ -400,13 +400,15 @@ With that privilege string, we create a USER Kaltura Session using the [`session
 
 ### Player Embed V7 
 
-You can create a new player in the [Studio](https://kmc.kaltura.com/index.php/kmcng/studio/v3) and grab its ID, which is referred to as the UI Conf ID. You'll need to edit it using the [uiconf.update](https://developer.kaltura.com/console/service/uiConf/action/update) API:
+You can create a new player in the [Studio](https://kmc.kaltura.com/index.php/kmcng/studio/v3) and grab its ID, which is referred to as the UI Conf ID. You'll need to edit it using the [uiconf.update](https://developer.kaltura.com/console/service/uiConf/action/update) API by passing the ID of the player and the confvars below:
 
-// TODO 
+```python
+id = "UI CONF ID"
+ui_conf = KalturaUiConf()
+ui_conf.confVars = "{\"kaltura-ovp-player\":\"0.50.0-vamb.1\", \"playkit-qna\": \"{latest}\", \"playkit-kaltura-live\": \"{latest}\", \"playkit-flash\":\"{latest}\"}"
+```
 
-
-
-In the HTML code, the first thing you'll need is the script that loads the Kaltura Player, which looks like this: 
+Now in the HTML code, the first thing you'll need is the script that loads the Kaltura Player, which looks like this: 
 
 ```javascript
   <script type="text/javascript" src="https://cdnapisec.kaltura.com/p/{{ partner_id }}/embedPlaykitJs/uiconf_id/{{ uiconf_id }}"></script>
@@ -421,7 +423,7 @@ The TARGET_ID is the ID of the div that will contain the player:
 And finally, the player embed script, for which you'll need your Partner ID, the KS we created above, the ID of the viewer, and the ID of the player:
 
 ```javascript
-<script>
+    <script>
         var kalturaPlayer = KalturaPlayer.setup({
         targetId: "kaltura_player",
         provider: {
@@ -434,17 +436,21 @@ And finally, the player embed script, for which you'll need your Partner ID, the
             autoplay: true
         },
         session: {
-            userId: '{{ user_id }} '
+            userId: '{{ user_id}} '
         }, 
         ui: {
             debug: true
         },
         plugins: {
-            qna: {
+            "qna": {
                 dateFormat: "mmmm do, yyyy",
                 expandMode: "OverTheVideo",
                 expandOnFirstPlay: true,
                 userRole: 'unmoderatedAdminRole' 
+                },
+            "kaltura-live": {
+                checkLiveWithKs: false,
+                isLiveInterval: 10
                 }
             } 
         });
@@ -452,6 +458,8 @@ And finally, the player embed script, for which you'll need your Partner ID, the
 
     </script>
 ```
+
+You'll see that we've included the plugins for q&a, and for kaltura-live, which enables the polling to the API to check if the entry is already live. 
 
 ### Player V2 Embed 
 

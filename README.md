@@ -9,7 +9,7 @@ This guide will walk you through the steps needed to set up the Webcast Launcher
 
 To get started, you'll need a Kaltura account, which you can sign up for [here](https://vpaas.kaltura.com/reg/index.php). You'll also need the webcasting module enabled on your account. Speak to your account manager or email us at vpaas@kaltura.com to get your account configured. 
 
-The code in this guide can be found in the [Python sample app](https://github.com/kaltura-vpaas/webcasting-app-python) that demonstrates webcasting integration in a basic application. 
+For a better understanding of this integration, check out the [Python sample app](https://github.com/kaltura-vpaas/webcasting-app-python) that demonstrates everything explained in this guide. 
 
 ## Creating a LiveStream Object 
 

@@ -204,10 +204,31 @@ Like the first schema, the XML is populated with the relevant values and added t
 
 ## The Webcasting Studio App 
 
-The admins, or person presenting, will need to download and use the Kaltura Webcasting Desktop Application. 
+### Creating Download Links 
+
+The admins, or person presenting, will need to download and use the Kaltura Webcasting Desktop Application. To add download links to your webpage for the Kaltura Webcasting Studio, we'll make a call to the [systemUIConf.listTemplates](https://developer.kaltura.com/console/service/uiConf/action/listTemplates) API to list instances of Webcasting UI Configs and grab the first one. 
+Then we'll parse it to find the recommended versions for OSX and Windows. 
+
+```python 
+filter = KalturaUiConfFilter()
+filter.objTypeEqual = KalturaUiConfObjType.WEBCASTING
+pager = KalturaFilterPager()
+
+result = client.uiConf.listTemplates(filter, pager)
+first = result.objects[0]
+config = json.loads(first.config)
+
+mac_download_url = config['osx']['recommendedVersionUrl']
+win_download_url = config['windows']['recommendedVersionUrl']
+```
+
+These URLS can be embedded to the page to automatically download the recommended version of the app. 
+
+### Application Launch 
+
 To launch the application, you'll need the attached [KAppLauncher script](https://github.com/kaltura-vpaas/webcasting-integration/blob/master/KAppLauncher.js), which requires the following params: 
 
-### Launch Params 
+#### Launch Params 
 
 * **KS**: the Kaltura Session authentication string that should be used (see below)
 * **ks_expiry:** the time that the KS will expire in format `YYYY-MM-DDThh:mm:ss+00:00`
@@ -216,6 +237,7 @@ To launch the application, you'll need the attached [KAppLauncher script](https:
 * **uiConfId:** The uiConfId that holds data for webcasting application version, and where it needs an update. Differs for mac and windows 
 * **serverAddress:** API server address (ie https://www.kaltura.com) 
 * **eventsMetadataProfileId:(optional)**  ID of the metadata profile that contains presenter information
+* **kwebcastMetadataProfileId:(optional)**  ID of the metadata profile that contains webcasting information
 * **appName (optional):** name of the application shown on splash screen (default: "Kaltura Webcast Studio")
 * **logoUrl (optional):** URL for company logo to be shown on top left of application (160 x 80 or similar ratio)
 * **fromDate (optional):** start time of the event (for the progress bar in the top right) in format `YYYY-MM-DDThh:mm:ss+00:00`
@@ -338,26 +360,6 @@ function launchKalturaWebcast() {
     }, 3000, true);
 }
 ```
-
-#### Creating Download Links 
-
-To add download links to your webpage for the Kaltura Webcasting Studio, we'll make a call to the [systemUIConf.listTemplates](https://developer.kaltura.com/console/service/uiConf/action/listTemplates) API to list instances of Webcasting UI Configs and grab the first one. 
-Then we'll parse it to find the recommended versions for OSX and Windows. 
-
-```python 
-filter = KalturaUiConfFilter()
-filter.objTypeEqual = KalturaUiConfObjType.WEBCASTING
-pager = KalturaFilterPager()
-
-result = client.uiConf.listTemplates(filter, pager)
-first = result.objects[0]
-config = json.loads(first.config)
-
-mac_download_url = config['osx']['recommendedVersionUrl']
-win_download_url = config['windows']['recommendedVersionUrl']
-```
-
-These URLS can be embedded to the page to automatically download the recommended version of the app. 
 
 ## Viewing the Livestream
 

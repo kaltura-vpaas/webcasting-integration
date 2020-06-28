@@ -64,6 +64,7 @@ live_stream_entry.pushPublishEnabled = KalturaLivePublishStatus.DISABLED
 
 live_stream_entry.explicitLive = KalturaNullableBoolean.TRUE_VALUE
 live_stream_entry.recordStatus = KalturaRecordStatus.PER_SESSION
+live_stream_entry.conversionProfileId = 0000000 
 
 live_stream_entry.recordingOptions = KalturaLiveEntryRecordingOptions()
 live_stream_entry.recordingOptions.shouldCopyEntitlement = KalturaNullableBoolean.TRUE_VALUE
@@ -377,7 +378,7 @@ if (is_live == False):
         entry_id = livestream.recordedEntryId
 ```
 
-For the case of `PER_SESSION` recording, the `recordedEntryId` field on the livestream Entry will be reset immediately, so we can find the entry by doing a [`baseEntry.list`](https://developer.kaltura.com/console/service/baseEntry/action/list) with the **rootEntryId** equal to our livestream entry:
+For the case of `PER_SESSION` recording, a new recording is created for every session, which means that the `recordedEntryId` field on the livestream Entry will be reset immediately to make room for a new recordedEntry. We find the entry by using [`baseEntry.list`](https://developer.kaltura.com/console/service/baseEntry/action/list) with the **rootEntryId** equal to our livestream entry:
 
 ```python
     else:

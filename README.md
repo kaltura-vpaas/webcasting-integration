@@ -247,7 +247,6 @@ To launch the application, you'll need the attached [KAppLauncher script](https:
 * **QnAEnabled:** whether `Q&A` module is enabled (default: true)
 * **pollsEnabled:** whether `Polls` module is enabled (default: true)
 * **userRole:** refers to KMS roles. Should be set to `adminRole`
-* **playerUIConf:[optional]** used for debugging*
 * **presentationConversionProfileId:** conversion profile ID used for converting presentations (see below)
 * **referer:[optional]**  URL of the referring site or domain name
 * **verifySSL:** if set to false, the application can get to https sites with unverified certificates. Used mainly for development (default: true)
@@ -326,13 +325,12 @@ We'll show it here in javascript. The params object is created using the data we
 document.getElementById("launchProducerApp").onclick = launchKalturaWebcast;
 
 function launchKalturaWebcast() {
-    var kapp = new KAppLauncher();
+    const kapp = new KAppLauncher();
 
-    var params = {
+    const params = {
         'ks' => <KALTURA SESSION>,
         'ks_expiry' => <EXPIRY DATE 'Y-m-d\TH:i:sP'>,
         'MediaEntryId' => <LIVESTEAM ENTRY>,
-        'uiConfID' => <MAC OR WIN UI CONF>,
         'serverAddress' => <SERVICE URL>,
         'eventsMetadataProfileId' => <KMS_EVENTS3 ID>,
         'kwebcastMetadataProfileId' => <KMS_KWEBCAST2 ID>,
@@ -344,7 +342,6 @@ function launchKalturaWebcast() {
         'QnAEnabled' => <TRUE / FALSE>,
         'pollsEnabled' => <TRUE / FALSE>,
         'userRole' => "adminRole", 
-        'playerUIConf' => <PLAYER ID>,
         'presentationConversionProfileId' => <CONVERSION PROFILE ID>,
         'referer' => <REFERRING SITE>,
         'debuggingMode' => false, 
@@ -364,7 +361,7 @@ function launchKalturaWebcast() {
 
 ## Viewing the Livestream
 
-When the broadcast is live, it takes about thirty seconds for it to be available for the viewer. During this time, the preview is available to a user with a Kaltura Session that contains "explictivlive" in the privilege string. 
+When the broadcast is live, there's a delay of about thirty seconds before it is available to the viewer. During this time, the preview is available to a user with a Kaltura Session that contains "explictivlive" in the privilege string (for moderators who are involved in testing)
 
 Do determine whether an entry is live, you can call the [isLive](https://developer.kaltura.com/console/service/liveStream/action/isLive) with the entry ID. 
 The Kaltura Player does this automatically for live entries, but we'll want to determine whether to play the live entry, or whether to replace it with the recorded entry if the Live Event is already complete. 
@@ -396,7 +393,7 @@ The most important part of the player KS is the privileges string, comma-separat
 The string looks something like this - using the format tool to concatenate values:
 
 ```python
-privileges = "sview:{},restrictexplicitliveview:{},enableentitlement,appid:{},appdomain:{},sessionkey:{}" \
+privileges = "sview:{},enableentitlement,appid:{},appdomain:{},sessionkey:{}" \
   .format(entry_id, entry_id, config.app_id, config.app_domain, user_id)
 ```
 With that privilege string, we create a USER Kaltura Session using the [`session.start`](https://developer.kaltura.com/console/service/session/action/start) API as seen above.
@@ -577,3 +574,5 @@ result = client.baseEntry.list(filter)
 ```
 
 
+
+For livestream analytics, see [this doc](https://github.com/kaltura-vpaas/webcasting-integration/blob/master/webcasting-analytics.md)

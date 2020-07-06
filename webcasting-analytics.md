@@ -1,7 +1,7 @@
 
 # Webcasting Analytics 
 
-Analytics for the livestream event can be retrieved via the [reporting](https://developer.kaltura.com/console/service/report/)] API. The API actions are split between `getTable`, `getGraph`, `getTotal`, etc - depending on the format in which you'd like to receive the data. 
+Analytics for the livestream event can be retrieved via the [reporting](https://developer.kaltura.com/console/service/report/) API. The API actions are split between `getTable`, `getGraph`, `getTotal`, etc - depending on the format in which you'd like to receive the data. 
 
 In this guide, the types of reports will be demonstrated using the [report.getTable](https://developer.kaltura.com/console/service/report/action/getTable) to make it easy to view results. 
 

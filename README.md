@@ -361,7 +361,7 @@ function launchKalturaWebcast() {
 
 ## Viewing the Livestream
 
-When the broadcast is live, there's a delay of about thirty seconds before it is available to the viewer. During this time, the preview is available to a user with a Kaltura Session that contains "explictivlive" in the privilege string (for moderators who are involved in testing)
+When the broadcast is live, there's a delay of about thirty seconds before it is available to the viewer. During this time, if the liveStream's "explicitLive" value is set to true, the preview is available to a user with a Kaltura Session that contains `restrictexplicitliveview` in the privilege string (for moderators who are involved in testing)
 
 Do determine whether an entry is live, you can call the [isLive](https://developer.kaltura.com/console/service/liveStream/action/isLive) with the entry ID. 
 The Kaltura Player does this automatically for live entries, but we'll want to determine whether to play the live entry, or whether to replace it with the recorded entry if the Live Event is already complete. 
@@ -468,7 +468,7 @@ You'll see that we've included the plugins for q&a, and for kaltura-live, which 
 In the HTML code, the first thing you'll need is the script that loads the Kaltura Player, which looks like this: 
 
 ```javascript
-<script type="text/javascript" src='https://cdnapisec.kaltura.com/p/{PARTNER_ID}/embedPlaykitJs/uiconf_id/{UICONF_ID}?autoembed=true&targetId={TARGET_ID}&entry_id={ENTRY_ID}&config[playback]={"autoplay":true}'></script>
+<script type="text/javascript" src="https://cdnapisec.kaltura.com/p/{PARTNER_ID}/sp/{PARTNER_ID}00/embedIframeJs/uiconf_id/{UICONF_ID}/partner_id/{PARTNER_ID}"></script>
 ```
 
 The TARGET_ID is the ID of the div that will contain the player:
@@ -485,36 +485,35 @@ And finally, the player embed script, for which you'll need your Partner ID, the
         'targetId': 'kaltura_player',
         'wid': '_{{ partner_id }}',
         'uiconf_id': '{{ uiconf_id }}',
-        'flashvars':
-            {
+        'flashvars': {
             'ks': '{{ ks }}',
-    'applicationName': '{{ app_name }}',
-    'disableAlerts': 'false',
-    'externalInterfaceDisabled': 'false',
-    'autoPlay': 'true',
+            'applicationName': '{{ app_name }}',
+            'disableAlerts': 'false',
+            'externalInterfaceDisabled': 'false',
+            'autoPlay': 'true',
             'autoMute': 'false',
             'largePlayBtn.plugin': 'false',
             'expandToggleBtn.plugin':'false',
-    'dualScreen': {'plugin': 'true'},
-    'chapters': {'plugin': 'true'},
-    'sideBarContainer': {'plugin': 'true'},
-    'LeadWithHLSOnFlash': 'true',
-    'EmbedPlayer.LiveCuepoints': 'true',
-    'EmbedPlayer.EnableIpadNativeFullscreen': 'true',
-    'qna': {
-      'plugin': 'true',
-      'moduleWidth': '200',
-      'containerPosition': 'right',
-      'qnaPollingInterval': '10000',
-      'onPage': 'false',
-      'userId': '{{ user_id }}',
-      'userRole': 'viewerRole',
-      'qnaTargetId': 'qnaListHolder'
-    },
-    'webcastPolls': {'plugin': 'true', 'userId': '{{ user_id }}', 'userRole': 'viewerRole'}
-  },
-'entry_id': '{{ entry_id }}'
-});
+            'dualScreen': {'plugin': 'true'},
+            'chapters': {'plugin': 'true'},
+            'sideBarContainer': {'plugin': 'true'},
+            'LeadWithHLSOnFlash': 'true',
+            'EmbedPlayer.LiveCuepoints': 'true',
+            'EmbedPlayer.EnableIpadNativeFullscreen': 'true',
+            'qna': {
+              'plugin': 'true',
+              'moduleWidth': '200',
+              'containerPosition': 'right',
+              'qnaPollingInterval': '10000',
+              'onPage': 'false',
+              'userId': '{{ user_id }}',
+              'userRole': 'viewerRole',
+              'qnaTargetId': 'qnaListHolder'
+            },
+            'webcastPolls': {'plugin': 'true', 'userId': '{{ user_id }}', 'userRole': 'viewerRole'}
+        },
+        'entry_id': '{{ entry_id }}'
+    });
 </script>
 ```
 
